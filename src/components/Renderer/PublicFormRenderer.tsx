@@ -66,13 +66,87 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
     // Assumed email to use (session or input)
     const activeEmail = session?.user?.email || emailInput;
 
-    const questions = form.sections[0]?.questions || [];
+    // Get all questions from all sections for validation/submission
+    const questions = form.sections.flatMap(s => s.questions || []);
 
     const handleAnswerChange = (questionId: string, value: string | string[] | number | null) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
     const [quizResult, setQuizResult] = useState<{ score: number, totalPoints: number } | null>(null);
+
+    // --- Multi-Step / Logic State ---
+    const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+
+    // Get current section and its questions
+    // Ensure form.sections is defined
+    const sections = form.sections && form.sections.length > 0 ? form.sections : [{ questions: form.sections?.[0]?.questions || [] } as Section & { questions: Question[] }];
+    const currentSection = sections[currentSectionIndex];
+    const currentQuestions = currentSection?.questions || [];
+    const isLastSection = currentSectionIndex === sections.length - 1;
+
+    // Helper to find navigation target from answers
+    const getNavigationTarget = (): string | null => {
+        // Iterate through questions in current section to find any branching rules
+        for (const q of currentQuestions) {
+            // Only check Logic for Multiple Choice / Dropdown
+            if (q.type === "MULTIPLE_CHOICE" || q.type === "DROPDOWN") {
+                const answer = answers[q.id];
+                if (answer && typeof answer === 'string') {
+                    // Find the selected option
+                    const options = q.options as unknown as QuestionOption[];
+                    const selectedOption = options?.find(opt => (opt.value || opt.label) === answer);
+                    if (selectedOption?.goToSectionId) {
+                        return selectedOption.goToSectionId;
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    const handleNext = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Basic Validation for Current Section
+        const missingRequired = currentQuestions.filter(q => q.required && !answers[q.id]);
+        if (missingRequired.length > 0) {
+            toast.error(`Please answer all required questions.`);
+            return;
+        }
+
+        const navTarget = getNavigationTarget();
+
+        if (navTarget === 'submit') {
+            await handleSubmit(e);
+            return;
+        }
+
+        if (navTarget && navTarget !== 'next') {
+            // Find section index by ID
+            const targetIndex = sections.findIndex(s => s.id === navTarget);
+            if (targetIndex !== -1) {
+                setCurrentSectionIndex(targetIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+        }
+
+        // Default: Next Section
+        if (!isLastSection) {
+            setCurrentSectionIndex(prev => prev + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            await handleSubmit(e);
+        }
+    };
+
+    const handleBack = () => {
+        if (currentSectionIndex > 0) {
+            setCurrentSectionIndex(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -157,78 +231,6 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
             </div>
         )
     }
-
-    return (
-    const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-
-    // Get current section and its questions
-    const sections = form.sections || [];
-    const currentSection = sections[currentSectionIndex];
-    const currentQuestions = currentSection?.questions || [];
-    const isLastSection = currentSectionIndex === sections.length - 1;
-
-    // Helper to find navigation target from answers
-    const getNavigationTarget = (): string | null => {
-        // Iterate through questions in current section to find any branching rules
-        for (const q of currentQuestions) {
-            // Only check Logic for Multiple Choice / Dropdown
-            if (q.type === "MULTIPLE_CHOICE" || q.type === "DROPDOWN") {
-                const answer = answers[q.id];
-                if (answer && typeof answer === 'string') {
-                    // Find the selected option
-                    const options = q.options as unknown as QuestionOption[];
-                    const selectedOption = options?.find(opt => (opt.value || opt.label) === answer);
-                    if (selectedOption?.goToSectionId) {
-                        return selectedOption.goToSectionId;
-                    }
-                }
-            }
-        }
-        return null;
-    };
-
-    const handleNext = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent form submission if triggered by button inside form
-
-        // Basic Validation for Current Section
-        const missingRequired = currentQuestions.filter(q => q.required && !answers[q.id]);
-        if (missingRequired.length > 0) {
-            toast.error(`Please answer all required questions.`);
-            return;
-        }
-
-        const navTarget = getNavigationTarget();
-
-        if (navTarget === 'submit') {
-            await handleSubmit(e);
-            return;
-        }
-
-        if (navTarget && navTarget !== 'next') {
-            // Find section index by ID (if we had IDs mapped to indexes)
-            const targetIndex = sections.findIndex(s => s.id === navTarget);
-            if (targetIndex !== -1) {
-                setCurrentSectionIndex(targetIndex);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-        }
-
-        // Default: Next Section
-        if (!isLastSection) {
-            setCurrentSectionIndex(prev => prev + 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            await handleSubmit(e);
-        }
-    };
-
-    const handleBack = () => {
-        if (currentSectionIndex > 0) {
-            setCurrentSectionIndex(prev => prev - 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
