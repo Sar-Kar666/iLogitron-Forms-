@@ -249,6 +249,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                                                 <SortableQuestionCard
                                                     key={question.id}
                                                     question={question}
+                                                    isQuiz={form.isQuiz}
                                                     onUpdate={handleUpdateQuestion}
                                                     onDelete={handleDeleteQuestion}
                                                 />

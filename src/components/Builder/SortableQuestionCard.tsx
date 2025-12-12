@@ -7,12 +7,14 @@ import { QuestionEditor } from "./QuestionEditor";
 
 interface SortableQuestionCardProps {
     question: Question;
+    isQuiz: boolean;
     onUpdate: (id: string, updates: Partial<Question>) => void;
     onDelete: (id: string) => void;
 }
 
 export function SortableQuestionCard({
     question,
+    isQuiz,
     onUpdate,
     onDelete,
 }: SortableQuestionCardProps) {
@@ -36,6 +38,7 @@ export function SortableQuestionCard({
         <div ref={setNodeRef} style={style}>
             <QuestionEditor
                 question={question}
+                isQuiz={isQuiz}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 dragHandleProps={{ ...attributes, ...listeners }}
