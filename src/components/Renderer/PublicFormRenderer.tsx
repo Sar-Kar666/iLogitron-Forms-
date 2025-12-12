@@ -72,6 +72,8 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
+    const [quizResult, setQuizResult] = useState<{ score: number, totalPoints: number } | null>(null);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -102,7 +104,13 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                 submissionData['__email_collected__'] = activeEmail;
             }
 
-            await submitResponse(form.id, submissionData);
+            const result = await submitResponse(form.id, submissionData);
+
+            if (result.isQuiz && typeof result.score === 'number') {
+                const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
+                setQuizResult({ score: result.score, totalPoints });
+            }
+
             setIsSubmitted(true);
             toast.success("Response submitted successfully!");
         } catch (error) {
@@ -135,6 +143,16 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
             <div className="max-w-xl mx-auto bg-white dark:bg-card rounded-lg shadow-md p-8 text-center space-y-4">
                 <h1 className="text-2xl font-bold">Thank You!</h1>
                 <p className="text-muted-foreground">Your response has been recorded.</p>
+
+                {quizResult && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 my-4">
+                        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Your Score</p>
+                        <p className="text-4xl font-bold text-primary">
+                            {quizResult.score} <span className="text-lg text-muted-foreground font-medium">/ {quizResult.totalPoints}</span>
+                        </p>
+                    </div>
+                )}
+
                 <Button variant="link" onClick={() => window.location.reload()}>Submit another response</Button>
             </div>
         )
