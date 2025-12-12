@@ -36,6 +36,6 @@ export const createFormSchema = z.object({
     title: z.string().min(1),
     description: z.string().optional(),
     isQuiz: z.boolean().optional(),
-    settings: z.record(z.any()).optional(),
+    settings: z.record(z.string(), z.any()).optional(),
     sections: z.array(sectionSchema).optional()
 });
