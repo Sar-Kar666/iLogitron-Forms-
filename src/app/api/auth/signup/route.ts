@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         const result = signUpSchema.safeParse(body);
 
         if (!result.success) {
-            return NextResponse.json({ success: false, error: result.error.errors }, { status: 400 });
+            return NextResponse.json({ success: false, error: result.error.flatten() }, { status: 400 });
         }
 
         const { email, password, name } = result.data;
