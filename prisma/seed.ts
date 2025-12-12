@@ -177,6 +177,7 @@ async function main() {
             // simpler logic for seed
             return {
                 questionId: q.id,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 value: q.options && Array.isArray(q.options) ? (q.options[0] as any).value : 'answer'
             };
         });
