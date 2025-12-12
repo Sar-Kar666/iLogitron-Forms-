@@ -24,10 +24,14 @@ import { Switch } from "@/components/UI/Switch";
 import { Save, Plus, Type, MessageSquare, Layout, ArrowLeft, Palette } from "lucide-react";
 import { SortableQuestionCard } from "./SortableQuestionCard";
 import { v4 as uuidv4 } from "uuid";
-import { ResponsesView } from "./ResponsesView";
+import { toast } from "sonner";
+import dynamic from "next/dynamic";
 import { ThemeEditor } from "./ThemeEditor";
 import { updateFormContent } from "@/app/builder/[id]/actions";
-import { toast } from "sonner";
+
+const ResponsesView = dynamic(() => import("./ResponsesView").then(mod => mod.ResponsesView), {
+    loading: () => <div className="p-12 text-center text-muted-foreground">Loading analytics...</div>
+});
 import { ThemeSettings } from "@/types";
 
 import { Form, Section, Question, QuestionType } from "@prisma/client";
