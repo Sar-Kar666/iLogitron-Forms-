@@ -95,58 +95,56 @@ export function QuestionEditor({ question, isQuiz, onUpdate, onDelete, dragHandl
                     <Trash2 className="h-4 w-4" />
                 </Button>
             </div>
-        </div>
-            {
-        isQuiz && (
-            <div className="border-t pt-4 pl-6 space-y-4">
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Answer Key</h4>
-                <div className="flex gap-4">
-                    <div className="w-24">
-                        <label className="text-xs font-medium mb-1 block">Points</label>
-                        <Input
-                            type="number"
-                            value={question.points || 0}
-                            onChange={(e) => onUpdate(question.id, { points: parseInt(e.target.value) || 0 })}
-                            className="h-8"
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <label className="text-xs font-medium mb-1 block">Correct Answer</label>
-                        {(question.type === "SHORT_TEXT" || question.type === "PARAGRAPH") ? (
+
+            {isQuiz && (
+                <div className="border-t pt-4 pl-6 space-y-4">
+                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Answer Key</h4>
+                    <div className="flex gap-4">
+                        <div className="w-24">
+                            <label className="text-xs font-medium mb-1 block">Points</label>
                             <Input
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                value={(question.metadata as any)?.correctAnswer || ""}
-                                onChange={(e) => onUpdate(question.id, {
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    metadata: { ...(question.metadata as any), correctAnswer: e.target.value }
-                                })}
-                                placeholder="Enter the correct answer text"
+                                type="number"
+                                value={question.points || 0}
+                                onChange={(e) => onUpdate(question.id, { points: parseInt(e.target.value) || 0 })}
                                 className="h-8"
                             />
-                        ) : (question.type === "MULTIPLE_CHOICE" || question.type === "DROPDOWN") ? (
-                            <Select
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                value={(question.metadata as any)?.correctAnswer || ""}
-                                onValueChange={(value) => onUpdate(question.id, {
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-xs font-medium mb-1 block">Correct Answer</label>
+                            {(question.type === "SHORT_TEXT" || question.type === "PARAGRAPH") ? (
+                                <Input
                                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    metadata: { ...(question.metadata as any), correctAnswer: value }
-                                })}
-                            >
-                                <SelectTrigger className="h-8">
-                                    <SelectValue placeholder="Select correct option" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {(question.options as unknown as QuestionOption[])?.map((opt) => (
-                                        <SelectItem key={opt.id} value={opt.label || ""}>{opt.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        ) : null}
+                                    value={(question.metadata as any)?.correctAnswer || ""}
+                                    onChange={(e) => onUpdate(question.id, {
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        metadata: { ...(question.metadata as any), correctAnswer: e.target.value }
+                                    })}
+                                    placeholder="Enter the correct answer text"
+                                    className="h-8"
+                                />
+                            ) : (question.type === "MULTIPLE_CHOICE" || question.type === "DROPDOWN") ? (
+                                <Select
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    value={(question.metadata as any)?.correctAnswer || ""}
+                                    onValueChange={(value) => onUpdate(question.id, {
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        metadata: { ...(question.metadata as any), correctAnswer: value }
+                                    })}
+                                >
+                                    <SelectTrigger className="h-8">
+                                        <SelectValue placeholder="Select correct option" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {(question.options as unknown as QuestionOption[])?.map((opt, idx) => (
+                                            <SelectItem key={opt.id || idx} value={opt.label || ""}>{opt.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : null}
+                        </div>
                     </div>
                 </div>
-            </div>
-        )
-    }
-        </div >
+            )}
+        </div>
     );
 }
