@@ -133,6 +133,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
             await updateFormContent(form.id, questions, {
                 title: form.title,
                 description: form.description || "",
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 settings: form.settings as any
             });
             toast.success("Saved");
