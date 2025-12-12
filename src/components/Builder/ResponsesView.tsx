@@ -11,16 +11,17 @@ function SimpleTable({ children }: { children: React.ReactNode }) {
 
 import { Question } from "@prisma/client";
 import { AnalyticsView } from "./AnalyticsView";
+import { ResponseData } from "@/types";
 import { BarChart, List } from "lucide-react";
 
 export function ResponsesView({ formId, questions }: { formId: string, questions: Question[] }) {
-    const [responses, setResponses] = useState<any[]>([]);
+    const [responses, setResponses] = useState<ResponseData[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<"summary" | "individual">("summary");
 
     useEffect(() => {
         getFormResponses(formId).then(data => {
-            setResponses(data || []);
+            setResponses((data as unknown as ResponseData[]) || []);
             setLoading(false);
         });
     }, [formId]);

@@ -27,7 +27,7 @@ export async function getPublicFormById(id: string) {
     return form;
 }
 
-export async function submitResponse(formId: string, answers: Record<string, any>) {
+export async function submitResponse(formId: string, answers: Record<string, string | string[] | number | null>) {
     // 1. Verify form exists
     const form = await prisma.form.findUnique({
         where: { id: formId },

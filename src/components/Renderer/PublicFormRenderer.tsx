@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Form, Section, Question, QuestionType } from "@prisma/client"; // Ensure imports match
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
+import { ThemeSettings, QuestionOption } from "@/types";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { submitResponse } from "@/app/forms/[id]/actions";
@@ -52,12 +53,12 @@ type FormWithSections = Form & {
 
 export function PublicFormRenderer({ form }: { form: FormWithSections }) {
     const { data: session, status } = useSession();
-    const [answers, setAnswers] = useState<Record<string, any>>({});
+    const [answers, setAnswers] = useState<Record<string, string | string[] | number | null>>({});
     const [emailInput, setEmailInput] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const settings = (form.settings as any) || {};
+    const settings = (form.settings as unknown as ThemeSettings) || {};
     const theme = settings.theme || {};
     const requiresLogin = settings.requiresLogin || false;
     const collectEmail = settings.collectEmail || false;
@@ -67,7 +68,7 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
 
     const questions = form.sections[0]?.questions || [];
 
-    const handleAnswerChange = (questionId: string, value: any) => {
+    const handleAnswerChange = (questionId: string, value: string | string[] | number | null) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
@@ -231,7 +232,7 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
 
                             {q.type === "MULTIPLE_CHOICE" && q.options && (
                                 <div className="space-y-2">
-                                    {(q.options as any).map((opt: any, idx: number) => (
+                                    {(q.options as unknown as QuestionOption[]).map((opt, idx) => (
                                         <label key={idx} className="flex items-center space-x-3 cursor-pointer">
                                             <input
                                                 type="radio"

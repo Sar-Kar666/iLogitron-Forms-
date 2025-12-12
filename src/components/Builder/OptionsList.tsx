@@ -5,26 +5,29 @@ import { Plus, X } from "lucide-react";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
 
-interface Option {
-    label: string;
-    value: string;
-    isCorrect?: boolean;
-}
+import { QuestionOption } from "@/types";
 
 interface OptionsListProps {
-    options: Option[] | undefined | null;
-    onChange: (options: Option[]) => void;
+    options: QuestionOption[] | undefined | null;
+    onChange: (options: QuestionOption[]) => void;
     type: "MULTIPLE_CHOICE" | "CHECKBOXES" | "DROPDOWN";
 }
 
 export function OptionsList({ options, onChange, type }: OptionsListProps) {
-    const [list, setList] = useState<Option[]>([]);
+    const [list, setList] = useState<QuestionOption[]>([]);
 
     useEffect(() => {
         if (Array.isArray(options)) {
-            setList(options);
+            // Only update if length differs or deep check needed (simplifying to length/id for now to avoid loop)
+            // But if parent creates new reference each time, we strictly need to avoid setList if contents same.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setList(prev => {
+                if (JSON.stringify(prev) !== JSON.stringify(options)) {
+                    return options;
+                }
+                return prev;
+            });
         } else {
-            // Default initial option
             setList([{ label: "Option 1", value: "option-1", isCorrect: false }]);
         }
     }, [options]);

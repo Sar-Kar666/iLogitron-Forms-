@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react"; // Removed useEffect as it wasn't used/visible in snippet
 import { Form } from "@prisma/client";
 import { X, Check } from "lucide-react";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
+import { ThemeSettings } from "@/types";
 
 interface ThemeEditorProps {
     form: Form;
-    onUpdate: (settings: any) => void;
+    onUpdate: (settings: ThemeSettings) => void;
     onClose: () => void;
 }
 
@@ -34,10 +35,11 @@ const BACKGROUND_COLORS = [
 ];
 
 export function ThemeEditor({ form, onUpdate, onClose }: ThemeEditorProps) {
-    const [settings, setSettings] = useState<any>(form.settings || {});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [settings, setSettings] = useState<ThemeSettings>(form.settings as any || {});
 
     const updateTheme = (key: string, value: string) => {
-        const newSettings = {
+        const newSettings: ThemeSettings = {
             ...settings,
             theme: {
                 ...(settings.theme || {}),

@@ -19,9 +19,13 @@ import {
 // Bright, Google-ish colors for charts
 const COLORS = ["#4285F4", "#DB4437", "#F4B400", "#0F9D58", "#AB47BC", "#00ACC1", "#FF7043", "#9E9D24"];
 
+interface ResponseData {
+    answers: Record<string, string | string[] | number | null>;
+}
+
 interface AnalyticsViewProps {
     questions: Question[];
-    responses: any[]; // Array of response objects { answers: Record<string, any> }
+    responses: ResponseData[];
 }
 
 export function AnalyticsView({ questions, responses }: AnalyticsViewProps) {
@@ -31,11 +35,11 @@ export function AnalyticsView({ questions, responses }: AnalyticsViewProps) {
             let totalAnswers = 0;
 
             responses.forEach((r) => {
-                const answer = r.answers[q.id];
+                const answer = r.answers[q.id] as string | string[] | number | null;
                 if (answer) {
                     if (Array.isArray(answer)) {
                         // Checkboxes
-                        answer.forEach((val: any) => {
+                        answer.forEach((val) => {
                             const strVal = String(val);
                             answerCounts[strVal] = (answerCounts[strVal] || 0) + 1;
                             totalAnswers++;
@@ -91,6 +95,7 @@ export function AnalyticsView({ questions, responses }: AnalyticsViewProps) {
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         label={({ name, percent }: any) => `${name} ${(percent ? percent * 100 : 0).toFixed(0)}%`}
                                         outerRadius={100}
                                         fill="#8884d8"

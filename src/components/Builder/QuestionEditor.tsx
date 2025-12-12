@@ -14,12 +14,13 @@ import {
 } from "@/components/UI/Select"; // Need to create Select component
 import { Switch } from "@/components/UI/Switch"; // Need to create Switch component
 import { OptionsList } from "./OptionsList";
+import { QuestionOption } from "@/types";
 
 interface QuestionEditorProps {
     question: Question;
     onUpdate: (id: string, updates: Partial<Question>) => void;
     onDelete: (id: string) => void;
-    dragHandleProps?: any; // Contains listener/attributes
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>; // Contains listener/attributes
 }
 
 export function QuestionEditor({ question, onUpdate, onDelete, dragHandleProps }: QuestionEditorProps) {
@@ -71,7 +72,8 @@ export function QuestionEditor({ question, onUpdate, onDelete, dragHandleProps }
                 <div className="pl-6 space-y-2">
                     <OptionsList
                         type={question.type}
-                        options={question.options as any}
+                        options={question.options as unknown as QuestionOption[]}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange={(options) => onUpdate(question.id, { options: options as any })}
                     />
                 </div>

@@ -47,10 +47,12 @@ export async function getFormById(id: string) {
     return form;
 }
 
+import { ThemeSettings } from "@/types";
+
 export async function updateFormContent(
     formId: string,
     questions: Question[],
-    settings?: { title?: string; description?: string; settings?: any }
+    settings?: { title?: string; description?: string; settings?: ThemeSettings }
 ) {
     const session = await getServerSession(authOptions);
 
@@ -85,7 +87,8 @@ export async function updateFormContent(
                 data: {
                     title: settings.title,
                     description: settings.description,
-                    settings: settings.settings ?? undefined
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    settings: (settings.settings as any) ?? undefined
                 }
             });
         }

@@ -28,6 +28,7 @@ import { ResponsesView } from "./ResponsesView";
 import { ThemeEditor } from "./ThemeEditor";
 import { updateFormContent } from "@/app/builder/[id]/actions";
 import { toast } from "sonner";
+import { ThemeSettings } from "@/types";
 
 import { Form, Section, Question, QuestionType } from "@prisma/client";
 
@@ -37,6 +38,8 @@ type FormWithSections = Form & {
         questions: Question[];
     })[];
 };
+
+
 
 interface FormBuilderProps {
     initialForm: FormWithSections;
@@ -49,6 +52,8 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
     );
     const [activeTab, setActiveTab] = useState<"editor" | "responses" | "settings">("editor");
     const [showThemeEditor, setShowThemeEditor] = useState(false);
+
+    const settings = (form.settings as unknown as ThemeSettings) || {};
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -109,7 +114,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                 await updateFormContent(form.id, questions, {
                     title: form.title,
                     description: form.description || "",
-                    settings: form.settings as any // Pass updated settings
+                    settings: form.settings as unknown as ThemeSettings // Pass updated settings
                 });
                 setLastSaved(new Date());
             } catch (err) {
@@ -140,8 +145,9 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
         }
     };
 
-    const handleUpdateSettings = (newSettings: any) => {
-        setForm({ ...form, settings: newSettings });
+    const handleUpdateSettings = (newSettings: ThemeSettings) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setForm({ ...form, settings: newSettings as any });
     };
 
     const [mounted, setMounted] = useState(false);
@@ -246,7 +252,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
 
                                 {questions.length === 0 && (
                                     <div className="py-10 text-center text-muted-foreground">
-                                        No questions yet. Click "Add Question" to start.
+                                        No questions yet. Click &quot;Add Question&quot; to start.
                                     </div>
                                 )}
                             </>
@@ -265,10 +271,11 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                                             </p>
                                         </div>
                                         <Switch
-                                            checked={(form.settings as any)?.collectEmail || false}
+                                            checked={settings.collectEmail || false}
                                             onCheckedChange={(checked) => setForm({
                                                 ...form,
-                                                settings: { ...(form.settings as any), collectEmail: checked }
+                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                settings: { ...settings, collectEmail: checked } as any
                                             })}
                                         />
                                     </div>
@@ -281,10 +288,11 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                                             </p>
                                         </div>
                                         <Switch
-                                            checked={(form.settings as any)?.requiresLogin || false}
+                                            checked={settings.requiresLogin || false}
                                             onCheckedChange={(checked) => setForm({
                                                 ...form,
-                                                settings: { ...(form.settings as any), requiresLogin: checked }
+                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                settings: { ...settings, requiresLogin: checked } as any
                                             })}
                                         />
                                     </div>
