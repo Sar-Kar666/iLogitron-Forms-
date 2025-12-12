@@ -11,9 +11,12 @@ interface OptionsListProps {
     options: QuestionOption[] | undefined | null;
     onChange: (options: QuestionOption[]) => void;
     type: "MULTIPLE_CHOICE" | "CHECKBOXES" | "DROPDOWN";
+    showNavigation?: boolean;
 }
 
-export function OptionsList({ options, onChange, type }: OptionsListProps) {
+export function OptionsList({ options, onChange, type, showNavigation }: OptionsListProps) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const props = { showNavigation }; // keeping previous logic reference valid
     const [list, setList] = useState<QuestionOption[]>([]);
 
     useEffect(() => {
@@ -99,6 +102,25 @@ export function OptionsList({ options, onChange, type }: OptionsListProps) {
                         className={`h-8 ${option.isCorrect ? 'text-green-600 font-medium' : ''}`}
                         placeholder={`Option ${index + 1}`}
                     />
+
+                    {/* Navigation Select */}
+                    {type !== "CHECKBOXES" && props.showNavigation && (
+                        <select
+                            // Simple native select for compactness in this list row
+                            value={option.goToSectionId || "next"}
+                            onChange={(e) => {
+                                const newList = [...list];
+                                newList[index].goToSectionId = e.target.value;
+                                setList(newList);
+                                onChange(newList);
+                            }}
+                            className="h-8 w-32 text-xs border rounded px-2 bg-transparent text-muted-foreground focus:ring-0 focus:border-primary"
+                        >
+                            <option value="next">Continue to next section</option>
+                            <option value="submit">Submit form</option>
+                        </select>
+                    )}
+
                     <Button variant="ghost" size="icon" onClick={() => handleRemove(index)} disabled={list.length <= 1}>
                         <X className="h-4 w-4 text-muted-foreground" />
                     </Button>

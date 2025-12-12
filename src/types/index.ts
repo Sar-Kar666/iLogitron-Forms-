@@ -13,6 +13,7 @@ export interface QuestionOption {
     label: string;
     value: string;
     isCorrect?: boolean;
+    goToSectionId?: string;
 }
 
 export interface ResponseData {

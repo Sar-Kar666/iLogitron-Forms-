@@ -75,18 +75,36 @@ export function QuestionEditor({ question, isQuiz, onUpdate, onDelete, dragHandl
                         type={question.type}
                         options={question.options as unknown as QuestionOption[]}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        showNavigation={(question.metadata as any)?.hasLogic}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange={(options) => onUpdate(question.id, { options: options as any })}
                     />
                 </div>
             )}
 
             <div className="flex items-center justify-end gap-2 border-t pt-4 mt-2">
-                <div className="flex items-center gap-2 mr-auto text-sm text-muted-foreground">
-                    <Switch
-                        checked={question.required}
-                        onCheckedChange={(checked) => onUpdate(question.id, { required: checked })}
-                    />
-                    <span>Required</span>
+                <div className="flex items-center gap-4 mr-auto text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={question.required}
+                            onCheckedChange={(checked) => onUpdate(question.id, { required: checked })}
+                        />
+                        <span>Required</span>
+                    </div>
+
+                    {(question.type === "MULTIPLE_CHOICE" || question.type === "DROPDOWN") && (
+                        <div className="flex items-center gap-2 border-l pl-4">
+                            <Switch
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                checked={(question.metadata as any)?.hasLogic || false}
+                                onCheckedChange={(checked) => onUpdate(question.id, {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    metadata: { ...(question.metadata as any), hasLogic: checked }
+                                })}
+                            />
+                            <span>Logic</span>
+                        </div>
+                    )}
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => { }}>
                     <Copy className="h-4 w-4" />
