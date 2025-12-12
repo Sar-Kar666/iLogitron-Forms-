@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  RESPONDER
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(RESPONDER)
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  
+  accounts      Account[]
+  sessions      Session[]
+  
+  forms         Form[]    @relation("OwnerForms")
+  responses     Response[]
+  collaborations FormCollaborator[]
+}
+
+model Form {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  ownerId      String
+  owner        User       @relation("OwnerForms", fields: [ownerId], references: [id])
+  published    Boolean    @default(false)
+  isQuiz       Boolean    @default(false)
+  settings     Json
+  sections     Section[]
+  responses    Response[]
+  collaborators FormCollaborator[]
+  versions     FormVersion[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Section {
+  id        String     @id @default(cuid())
+  form      Form       @relation(fields: [formId], references: [id])
+  formId    String
+  title     String?
+  order     Int
+  questions Question[]
+}
+
+model Question {
+  id          String    @id @default(cuid())
+  section     Section   @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  type        QuestionType
+  label       String
+  helpText    String?
+  required    Boolean   @default(false)
+  options     Json?
+  validation  Json?
+  points      Int?
+  metadata    Json?
+  order       Int
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  PARAGRAPH
+  MULTIPLE_CHOICE
+  CHECKBOXES
+  DROPDOWN
+  FILE
+  LINEAR_SCALE
+  GRID
+  DATE
+  TIME
+  RATING
+}
+
+model Response {
+  id         String   @id @default(cuid())
+  form       Form     @relation(fields: [formId], references: [id])
+  formId     String
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String?
+  answers    Json
+  score      Int?
+  createdAt  DateTime @default(now())
+  metadata   Json?
+}
+
+model FormCollaborator {
+  id       String @id @default(cuid())
+  form     Form   @relation(fields: [formId], references: [id])
+  formId   String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  role     Role
+  addedAt  DateTime @default(now())
+}
+
+model FormVersion {
+  id        String  @id @default(cuid())
+  form      Form    @relation(fields: [formId], references: [id])
+  formId    String
+  snapshot  Json
+  createdAt DateTime @default(now())
+}
