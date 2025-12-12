@@ -118,6 +118,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                 await updateFormContent(form.id, questions, {
                     title: form.title,
                     description: form.description || "",
+                    isQuiz: form.isQuiz,
                     settings: form.settings as unknown as ThemeSettings // Pass updated settings
                 });
                 setLastSaved(new Date());
@@ -137,6 +138,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
             await updateFormContent(form.id, questions, {
                 title: form.title,
                 description: form.description || "",
+                isQuiz: form.isQuiz,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 settings: form.settings as any
             });
@@ -299,6 +301,19 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                 settings: { ...settings, requiresLogin: checked } as any
                                             })}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                                        <div className="space-y-0.5">
+                                            <label className="text-base font-medium">Make this a quiz</label>
+                                            <p className="text-sm text-muted-foreground">
+                                                Assign point values, set answers, and automatically provide feedback.
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            checked={form.isQuiz}
+                                            onCheckedChange={(checked) => setForm({ ...form, isQuiz: checked })}
                                         />
                                     </div>
                                 </div>

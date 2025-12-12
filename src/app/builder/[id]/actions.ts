@@ -52,7 +52,7 @@ import { ThemeSettings } from "@/types";
 export async function updateFormContent(
     formId: string,
     questions: Question[],
-    settings?: { title?: string; description?: string; settings?: ThemeSettings }
+    settings?: { title?: string; description?: string; isQuiz?: boolean; settings?: ThemeSettings }
 ) {
     const session = await getServerSession(authOptions);
 
@@ -87,6 +87,7 @@ export async function updateFormContent(
                 data: {
                     title: settings.title,
                     description: settings.description,
+                    isQuiz: settings.isQuiz,
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     settings: (settings.settings as any) ?? undefined
                 }
