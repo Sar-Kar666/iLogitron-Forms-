@@ -159,6 +159,78 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
     }
 
     return (
+    const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+
+    // Get current section and its questions
+    const sections = form.sections || [];
+    const currentSection = sections[currentSectionIndex];
+    const currentQuestions = currentSection?.questions || [];
+    const isLastSection = currentSectionIndex === sections.length - 1;
+
+    // Helper to find navigation target from answers
+    const getNavigationTarget = (): string | null => {
+        // Iterate through questions in current section to find any branching rules
+        for (const q of currentQuestions) {
+            // Only check Logic for Multiple Choice / Dropdown
+            if (q.type === "MULTIPLE_CHOICE" || q.type === "DROPDOWN") {
+                const answer = answers[q.id];
+                if (answer && typeof answer === 'string') {
+                    // Find the selected option
+                    const options = q.options as unknown as QuestionOption[];
+                    const selectedOption = options?.find(opt => (opt.value || opt.label) === answer);
+                    if (selectedOption?.goToSectionId) {
+                        return selectedOption.goToSectionId;
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    const handleNext = async (e: React.FormEvent) => {
+        e.preventDefault(); // Prevent form submission if triggered by button inside form
+
+        // Basic Validation for Current Section
+        const missingRequired = currentQuestions.filter(q => q.required && !answers[q.id]);
+        if (missingRequired.length > 0) {
+            toast.error(`Please answer all required questions.`);
+            return;
+        }
+
+        const navTarget = getNavigationTarget();
+
+        if (navTarget === 'submit') {
+            await handleSubmit(e);
+            return;
+        }
+
+        if (navTarget && navTarget !== 'next') {
+            // Find section index by ID (if we had IDs mapped to indexes)
+            const targetIndex = sections.findIndex(s => s.id === navTarget);
+            if (targetIndex !== -1) {
+                setCurrentSectionIndex(targetIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+        }
+
+        // Default: Next Section
+        if (!isLastSection) {
+            setCurrentSectionIndex(prev => prev + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            await handleSubmit(e);
+        }
+    };
+
+    const handleBack = () => {
+        if (currentSectionIndex > 0) {
+            setCurrentSectionIndex(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    return (
         <div className="max-w-3xl mx-auto space-y-6">
             {/* Dynamic Style Injection */}
             <style jsx global>{`
@@ -180,7 +252,8 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                 {form.description && (
                     <p className="text-muted-foreground mt-2 whitespace-pre-wrap">{form.description}</p>
                 )}
-                {/* Email Collection Status / Switch Account */}
+
+                {/* Email Collection Status */}
                 {collectEmail && (
                     <div className="mt-4 pt-4 border-t flex items-center justify-between text-sm text-muted-foreground">
                         {session?.user?.email ? (
@@ -198,9 +271,9 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                 )}
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Manual Email Input if collecting and not logged in */}
-                {collectEmail && !session?.user?.email && (
+            <form onSubmit={handleNext} className="space-y-4">
+                {/* Manual Email Input - Show only on first section */}
+                {collectEmail && !session?.user?.email && currentSectionIndex === 0 && (
                     <div className="bg-card rounded-lg shadow-sm border p-6 space-y-4">
                         <div className="space-y-1">
                             <label className="text-base font-medium text-foreground block">
@@ -218,7 +291,7 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                     </div>
                 )}
 
-                {questions.map((q) => (
+                {currentQuestions.map((q) => (
                     <div key={q.id} className="bg-card rounded-lg shadow-sm border p-6 space-y-4">
                         <div className="space-y-1">
                             <label className="text-base font-medium text-foreground block">
@@ -266,7 +339,6 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                                 </div>
                             )}
 
-                            {/* Fallback for other types for now */}
                             {["CHECKBOXES", "DROPDOWN", "DATE", "TIME", "LINEAR_SCALE"].includes(q.type) && (
                                 <div className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950 dark:text-amber-400 p-2 rounded">
                                     Type {q.type} renderer coming soon.
@@ -277,12 +349,22 @@ export function PublicFormRenderer({ form }: { form: FormWithSections }) {
                 ))}
 
                 <div className="flex justify-between items-center py-4">
-                    <Button type="submit" size="lg" disabled={isSubmitting}>
-                        {isSubmitting ? "Submitting..." : "Submit"}
-                    </Button>
-                    <Button type="button" variant="ghost" className="text-muted-foreground" onClick={() => setAnswers({})}>
-                        Clear form
-                    </Button>
+                    {currentSectionIndex > 0 ? (
+                        <Button type="button" variant="outline" onClick={handleBack}>
+                            Back
+                        </Button>
+                    ) : (
+                        <div /> // Spacer
+                    )}
+
+                    <div className="flex gap-2">
+                        <Button type="button" variant="ghost" className="text-muted-foreground" onClick={() => setAnswers({})}>
+                            Clear form
+                        </Button>
+                        <Button type="submit" size="lg" disabled={isSubmitting}>
+                            {isSubmitting ? "Submitting..." : (isLastSection ? "Submit" : "Next")}
+                        </Button>
+                    </div>
                 </div>
             </form>
         </div>
