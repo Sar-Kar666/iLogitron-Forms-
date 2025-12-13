@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
 import { Switch } from "@/components/UI/Switch";
-import { Save, Plus, Type, Layout, ArrowLeft, Palette } from "lucide-react";
+import { Save, Plus, Type, ArrowLeft, Palette, Eye } from "lucide-react";
 import { SortableQuestionCard } from "./SortableQuestionCard";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import { updateFormContent } from "@/app/builder/[id]/actions";
 const ResponsesView = dynamic(() => import("./ResponsesView").then(mod => mod.ResponsesView), {
     loading: () => <div className="p-12 text-center text-muted-foreground">Loading analytics...</div>
 });
+import { ShareModal } from "./ShareModal";
 import { ThemeSettings } from "@/types";
 
 import { Form, Section, Question, QuestionType } from "@prisma/client";
@@ -56,6 +57,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
     );
     const [activeTab, setActiveTab] = useState<"editor" | "responses" | "settings">("editor");
     const [showThemeEditor, setShowThemeEditor] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     const settings = (form.settings as unknown as ThemeSettings) || {};
 
@@ -157,6 +159,21 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
         setForm({ ...form, settings: newSettings as any });
     };
 
+    const handlePublish = async (newPublishedState: boolean) => {
+        try {
+            setForm({ ...form, published: newPublishedState });
+            await updateFormContent(form.id, questions, {
+                published: newPublishedState
+            });
+            toast.success(newPublishedState ? "Form published" : "Form unpublished");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to update publish status");
+            // Revert on error
+            setForm({ ...form, published: !newPublishedState });
+        }
+    };
+
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
@@ -204,9 +221,11 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                             Settings
                         </button>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => window.open(`/forms/${form.id}`, '_blank')}>
-                        <Layout className="mr-2 h-4 w-4" />
-                        Preview / Share
+                    <Button variant="ghost" size="icon" onClick={() => window.open(`/forms/${form.id}`, '_blank')} title="Preview">
+                        <Eye className="h-5 w-5" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
+                        Share
                     </Button>
                     <Button onClick={handleSave}>
                         <Save className="mr-2 h-4 w-4" />
@@ -345,6 +364,14 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                         onClose={() => setShowThemeEditor(false)}
                     />
                 )}
+
+                <ShareModal
+                    isOpen={showShareModal}
+                    onClose={() => setShowShareModal(false)}
+                    formId={form.id}
+                    published={form.published}
+                    onPublishChange={handlePublish}
+                />
             </div>
         </div>
     );
