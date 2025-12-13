@@ -12,9 +12,11 @@ export default async function PublicFormPage({ params }: { params: { id: string 
 
     // TODO: Add check for form.published status if we add that feature later.
 
+    const questions = form.sections.flatMap(section => section.questions);
+
     return (
         <div className="min-h-screen bg-purple-50 dark:bg-zinc-950 py-10 px-4">
-            <PublicFormRenderer form={form} />
+            <PublicFormRenderer form={{ ...form, questions: questions as any[] }} />
         </div>
     );
 }
