@@ -35,7 +35,10 @@ export function useAutosave<T>(
     }, []);
 
     const debouncedSave = useMemo(
-        () => debounce(executeSave, delay),
+        () => {
+            // eslint-disable-next-line react-hooks/refs
+            return debounce(executeSave, delay);
+        },
         [executeSave, delay]
     );
 

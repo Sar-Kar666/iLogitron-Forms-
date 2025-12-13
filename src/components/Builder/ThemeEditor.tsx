@@ -4,7 +4,6 @@ import { useState } from "react"; // Removed useEffect as it wasn't used/visible
 import { Form } from "@prisma/client";
 import { X, Check } from "lucide-react";
 import { Button } from "@/components/UI/Button";
-import { Input } from "@/components/UI/Input";
 import { ThemeSettings } from "@/types";
 
 interface ThemeEditorProps {

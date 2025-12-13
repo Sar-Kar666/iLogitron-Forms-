@@ -1,4 +1,4 @@
-import { Question, QuestionType } from "@prisma/client";
+import { Question } from "@prisma/client";
 
 export interface EditorOption {
     id: string;

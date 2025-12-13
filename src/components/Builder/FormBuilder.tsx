@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
 import { Switch } from "@/components/UI/Switch";
-import { Save, Plus, Type, MessageSquare, Layout, ArrowLeft, Palette } from "lucide-react";
+import { Save, Plus, Type, Layout, ArrowLeft, Palette } from "lucide-react";
 import { SortableQuestionCard } from "./SortableQuestionCard";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -106,7 +106,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
     };
 
     const [saving, setSaving] = useState(false);
-    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    // const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
     // Debounce Save hook
     useEffect(() => {
@@ -121,7 +121,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                     isQuiz: form.isQuiz,
                     settings: form.settings as unknown as ThemeSettings // Pass updated settings
                 });
-                setLastSaved(new Date());
+                // setLastSaved(new Date());
             } catch (err) {
                 console.error("Auto-save failed", err);
             } finally {
@@ -143,7 +143,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                 settings: form.settings as any
             });
             toast.success("Saved");
-            setLastSaved(new Date());
+            // setLastSaved(new Date());
         } catch (error) {
             toast.error("Failed to save form");
             console.error(error);

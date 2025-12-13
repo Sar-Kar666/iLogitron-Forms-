@@ -1,7 +1,5 @@
 import React from 'react';
 import { FormEditor } from '@/components/Editor/FormEditor';
-import { prisma } from '@/lib/prisma';
-import { notFound } from 'next/navigation';
 
 interface FormEditorPageProps {
     params: Promise<{

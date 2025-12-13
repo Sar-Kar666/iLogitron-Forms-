@@ -1,7 +1,6 @@
 import { getPublicFormById } from "./actions";
 import { notFound } from "next/navigation";
 import { PublicFormRenderer } from "@/components/Renderer/PublicFormRenderer";
-import { prisma } from '@/lib/prisma';
 import { EditorQuestion } from '@/types/editor';
 
 export default async function PublicFormPage({ params }: { params: { id: string } }) {
