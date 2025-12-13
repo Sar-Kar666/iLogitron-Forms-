@@ -108,8 +108,8 @@ export const FormEditor: React.FC<FormEditorProps> = ({
         setActiveQuestionId(newQuestion.id);
     };
 
-    const updateQuestion = (id: string, updates: Partial<Question>) => {
-        setQuestions(questions.map(q => q.id === id ? { ...q, ...updates } : q));
+    const updateQuestion = (id: string, updates: Partial<EditorQuestion>) => {
+        setQuestions(questions.map(q => q.id === id ? { ...q, ...updates } as EditorQuestion : q));
     };
 
     const deleteQuestion = (id: string) => {
