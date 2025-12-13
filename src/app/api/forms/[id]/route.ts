@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function PUT(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export async function PUT(
         // For dev/demo, we might skip strict owner check or check if user is editor.
         // Assuming permissive for now or I need to handle cases where form is not found first.
 
-        const id = params.id;
+        const { id } = await params;
         const body = await req.json();
 
         // Body contains title, description, questions (array)

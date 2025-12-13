@@ -4,9 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
 interface FormEditorPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 // In a real app we'd fetch the form here.
@@ -20,9 +20,10 @@ interface FormEditorPageProps {
 // until I can confirm DB connection. 
 // Actually, FormEditor is "use client", so this page can be server component that just passes ID.
 
-export default function FormEditorPage({ params }: FormEditorPageProps) {
+export default async function FormEditorPage({ params }: FormEditorPageProps) {
     // const form = await prisma.form.findUnique... 
     // skipping fetch for dev without DB
+    const { id } = await params;
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -52,7 +53,7 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
             </header>
 
             <main className="flex-1 overflow-y-auto">
-                <FormEditor formId={params.id} />
+                <FormEditor formId={id} />
             </main>
         </div>
     );
