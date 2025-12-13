@@ -10,6 +10,7 @@ export interface ThemeSettings {
 }
 
 export interface QuestionOption {
+    id?: string;
     label: string;
     value: string;
     isCorrect?: boolean;
