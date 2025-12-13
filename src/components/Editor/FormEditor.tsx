@@ -18,7 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { QuestionCard } from "./QuestionCard";
 import { Toolbar } from "./Toolbar";
-import { Question, QuestionType } from "@prisma/client";
+import { QuestionType } from "@prisma/client";
 import { useAutosave } from "@/hooks/useAutosave";
 import { EditorQuestion } from "@/types/editor";
 
@@ -60,7 +60,7 @@ export const FormEditor: React.FC<FormEditorProps> = ({
     const [activeQuestionId, setActiveQuestionId] = useState<string | null>(questions[0]?.id || null);
 
     // Autosave
-    const { saveStatus, lastSavedAt } = useAutosave(
+    useAutosave(
         { title, description, questions },
         async (data) => {
             const res = await fetch(`/api/forms/${formId}`, {
@@ -94,7 +94,7 @@ export const FormEditor: React.FC<FormEditorProps> = ({
     };
 
     const addQuestion = () => {
-        const newQuestion: any = {
+        const newQuestion: EditorQuestion = {
             id: generateId(),
             sectionId: "default",
             type: QuestionType.MULTIPLE_CHOICE,
@@ -102,6 +102,9 @@ export const FormEditor: React.FC<FormEditorProps> = ({
             helpText: "",
             required: false,
             options: [{ id: generateId(), label: "Option 1" }],
+            validation: null,
+            points: 0,
+            metadata: null,
             order: questions.length,
         };
         setQuestions([...questions, newQuestion]);
@@ -146,12 +149,16 @@ export const FormEditor: React.FC<FormEditorProps> = ({
                     <input
                         type="text"
                         className="text-3xl text-foreground w-full border-b border-transparent hover:border-gray-200 focus:border-primary focus:outline-none transition-colors py-2"
-                        defaultValue="Untitled form"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Untitled form"
                     />
                     <input
                         type="text"
                         className="text-md text-gray-500 w-full border-b border-transparent hover:border-gray-200 focus:border-gray-300 focus:outline-none transition-colors py-1 mt-2"
-                        defaultValue="Form description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Form description"
                     />
                 </div>
 
@@ -201,7 +208,7 @@ export const FormEditor: React.FC<FormEditorProps> = ({
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const SortableQuestionItem = ({ id, ...props }: any) => {
+const SortableQuestionItem = ({ id, ...props }: { id: string } & React.ComponentProps<typeof QuestionCard>) => {
     const {
         attributes,
         listeners,

@@ -68,11 +68,41 @@ export const PublicFormRenderer: React.FC<PublicFormRendererProps> = ({ form }) 
         defaultValues: {}
     });
 
+    const [submitting, setSubmitting] = React.useState(false);
+    const [submitted, setSubmitted] = React.useState(false);
+
     const onSubmit = async (data: Record<string, unknown>) => {
-        console.log("Form Data:", data);
-        // TODO: Submit to API
-        alert("Submitted! (Check console)");
+        try {
+            setSubmitting(true);
+            const res = await fetch(`/api/forms/${form.id}/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers: data })
+            });
+
+            if (!res.ok) throw new Error("Submission failed");
+
+            setSubmitted(true);
+            // alert("Submitted successfully!");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to submit form. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
+
+    if (submitted) {
+        return (
+            <div className="max-w-3xl mx-auto py-8 px-4">
+                <div className="bg-white rounded-lg border-t-8 border-t-purple-600 shadow-sm p-8 text-center">
+                    <h1 className="text-2xl font-medium text-gray-900 mb-2">{form.title}</h1>
+                    <p className="text-gray-600 mb-6">Your response has been recorded.</p>
+                    <a href={`/s/${form.id}`} className="text-sm text-purple-600 hover:underline">Submit another response</a>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-3xl mx-auto py-8 px-4">
@@ -159,7 +189,9 @@ export const PublicFormRenderer: React.FC<PublicFormRendererProps> = ({ form }) 
                     ))}
 
                     <div className="flex justify-between items-center pt-4">
-                        <Button type="submit" size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8">Submit</Button>
+                        <Button type="submit" size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8" disabled={submitting}>
+                            {submitting ? "Submitting..." : "Submit"}
+                        </Button>
                         <button type="button" className="text-purple-600 text-sm font-medium hover:text-purple-800" onClick={() => methods.reset()}>Clear form</button>
                     </div>
                 </form>

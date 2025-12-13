@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { EditorQuestion } from "@/types/editor";
 
 export async function PUT(
     req: Request,
@@ -54,7 +55,8 @@ export async function PUT(
         // - Upsert each question.
 
         if (questions && Array.isArray(questions)) {
-            const questionIds = questions.map((q: any) => q.id).filter(Boolean);
+            const questionList = questions as Partial<EditorQuestion>[];
+            const questionIds = questionList.map((q) => q.id).filter(Boolean) as string[];
 
             // Find default section (or create if missing)
             let section = await prisma.section.findFirst({ where: { formId: id } });

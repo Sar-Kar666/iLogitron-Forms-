@@ -1,7 +1,4 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
 import { PublicFormRenderer } from '@/components/Renderer/PublicFormRenderer';
-import { prisma } from '@/lib/prisma';
 import { EditorQuestion } from '@/types/editor';
 
 interface PublicFormPageProps {
@@ -72,12 +69,19 @@ export default async function PublicFormPage({ params }: PublicFormPageProps) {
                 points: 0,
                 metadata: null
             }
-        ] as any[]
+        ] as EditorQuestion[] // Mock data cast
+    };
+
+    // Ensure questions match EditorQuestion type for renderer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formWithQuestions: any = {
+        ...form,
+        questions: form.questions
     };
 
     return (
         <div className="min-h-screen bg-[#f0ebf8]">
-            <PublicFormRenderer form={form} />
+            <PublicFormRenderer form={formWithQuestions} />
         </div>
     );
 }

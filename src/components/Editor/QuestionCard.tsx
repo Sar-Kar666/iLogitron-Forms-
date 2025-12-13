@@ -2,7 +2,7 @@
 
 import React from "react";
 import { QuestionType } from "@prisma/client";
-import { EditorQuestion } from "@/types/editor";
+import { EditorQuestion, EditorOption } from "@/types/editor";
 import { Button } from "@/components/UI/Button"; // Button exists
 import { Trash2, Copy, MoreVertical, GripVertical } from "lucide-react";
 
@@ -13,7 +13,7 @@ interface QuestionCardProps {
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
     onClick: () => void;
-    dragHandleProps?: any;
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -67,13 +67,24 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                                     <option value="DROPDOWN">Dropdown</option>
                                     <option value="FILE">File upload</option>
                                 </select>
+                                {/* Assuming the user intended to add a checkbox for 'hasLogic' here */}
+                                <label className="flex items-center gap-1 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={question.metadata?.hasLogic || false}
+                                        onChange={(e) => onUpdate(question.id, {
+                                            metadata: { ...(question.metadata || {}), hasLogic: e.target.checked }
+                                        })}
+                                    />
+                                    Has Logic
+                                </label>
                             </div>
                         )}
 
                         {/* Options Area */}
                         {(question.type === 'MULTIPLE_CHOICE' || question.type === 'CHECKBOXES' || question.type === 'DROPDOWN') && (
                             <div className="space-y-2 mt-4">
-                                {(question.options as any[])?.map((option, index) => (
+                                {(question.options as unknown as EditorOption[])?.map((option, index) => (
                                     <div key={option.id || index} className="flex items-center gap-2 group/option">
                                         {/* Icon based on type */}
                                         <div className="text-gray-400">
@@ -87,7 +98,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                                             className="flex-1 bg-transparent border-b border-transparent hover:border-gray-200 focus:border-primary focus:outline-none transition-colors py-1"
                                             value={option.label}
                                             onChange={(e) => {
-                                                const newOptions = [...(question.options as any[])];
+                                                const newOptions = [...(question.options as unknown as EditorOption[])];
                                                 newOptions[index] = { ...newOptions[index], label: e.target.value };
                                                 onUpdate(question.id, { options: newOptions });
                                             }}
@@ -99,7 +110,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                                             size="icon"
                                             className="opacity-0 group-hover/option:opacity-100 text-gray-400 hover:text-red-500"
                                             onClick={() => {
-                                                const newOptions = (question.options as any[]).filter((_, i) => i !== index);
+                                                const newOptions = (question.options as unknown as EditorOption[]).filter((_, i) => i !== index);
                                                 onUpdate(question.id, { options: newOptions });
                                             }}
                                         >
@@ -114,7 +125,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                                     <button
                                         className="text-sm text-gray-500 hover:text-primary hover:underline"
                                         onClick={() => {
-                                            const newOptions = [...(question.options as any[] || []), { id: crypto.randomUUID(), label: `Option ${(question.options as any[] || []).length + 1}` }];
+                                            const newOptions = [...(question.options as unknown as EditorOption[] || []), { id: crypto.randomUUID(), label: `Option ${(question.options as unknown as EditorOption[] || []).length + 1}` }];
                                             onUpdate(question.id, { options: newOptions });
                                         }}
                                     >

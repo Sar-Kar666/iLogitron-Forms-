@@ -17,8 +17,11 @@ export interface QuestionOption {
     goToSectionId?: string;
 }
 
+// Basic structure for stored answers
+export type FormAnswers = Record<string, string | string[] | number | null>;
+
 export interface ResponseData {
-    answers: Record<string, string | string[] | number | null>;
-    createdAt: Date;
     id: string;
+    answers: FormAnswers;
+    createdAt: Date;
 }

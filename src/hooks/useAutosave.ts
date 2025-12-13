@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import debounce from 'lodash.debounce';
 
 // Generic Autosave Hook
 export function useAutosave<T>(
     data: T,
-    onSave: (data: T) => Promise<any>,
+    onSave: (data: T) => Promise<unknown>,
     delay: number = 1000
 ) {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -20,29 +22,32 @@ export function useAutosave<T>(
         latestOnSave.current = onSave;
     }, [onSave]);
 
+    const executeSave = useCallback(async (currentData: T) => {
+        try {
+            setSaveStatus('saving');
+            await latestOnSave.current(currentData);
+            setSaveStatus('saved');
+            setLastSavedAt(new Date());
+        } catch (error) {
+            console.error("Autosave failed", error);
+            setSaveStatus('error');
+        }
+    }, []);
+
+    const debouncedSave = useMemo(
+        () => debounce(executeSave, delay),
+        [executeSave, delay]
+    );
+
     useEffect(() => {
-        // When data changes, we are technically "unsaved" or "pending".
-        // We avoid setting state here to prevent strict mode warnings/renders, 
-        // or we accept it. For now, let's just set timeout.
+        // Trigger save when data changes
+        debouncedSave(data);
 
-        const handler = setTimeout(async () => {
-            try {
-                setSaveStatus('saving');
-                await latestOnSave.current(latestData.current);
-                setSaveStatus('saved');
-                setLastSavedAt(new Date());
-            } catch (error) {
-                console.error("Autosave failed", error);
-                setSaveStatus('error');
-            }
-        }, delay);
-
+        // Cancel on unmount
         return () => {
-            clearTimeout(handler);
+            debouncedSave.cancel();
         };
-    }, [data, delay]);
-
-    // Logic to prevent save on mount if needed, but here simple debounce is fine.
+    }, [data, debouncedSave]);
 
     return { saveStatus, lastSavedAt };
 }
