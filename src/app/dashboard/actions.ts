@@ -42,7 +42,10 @@ export async function createForm(data: { title: string; description?: string }) 
             title: data.title,
             description: data.description,
             ownerId: session.user.id,
-            settings: {},
+            settings: {
+                requiresLogin: true,
+                collectEmail: true
+            },
             published: false,
             sections: {
                 create: {

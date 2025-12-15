@@ -1,7 +1,10 @@
 import { getPublicFormById } from "./actions";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PublicFormRenderer } from "@/components/Renderer/PublicFormRenderer";
 import { EditorQuestion } from '@/types/editor';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { ThemeSettings } from "@/types";
 
 export default async function PublicFormPage({ params }: { params: { id: string } }) {
     const resolvedParams = await Promise.resolve(params);
@@ -13,6 +16,13 @@ export default async function PublicFormPage({ params }: { params: { id: string 
 
     if (!form.published) {
         notFound();
+    }
+
+    const session = await getServerSession(authOptions);
+    const settings = form.settings as unknown as ThemeSettings;
+
+    if (settings?.requiresLogin && !session?.user) {
+        redirect(`/api/auth/signin?callbackUrl=/forms/${form.id}`);
     }
 
     const questions = form.sections.flatMap(section => section.questions);

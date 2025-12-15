@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { ThemeSettings } from "@/types";
+
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -14,14 +18,27 @@ export async function POST(
             return NextResponse.json({ success: false, error: "Missing answers" }, { status: 400 });
         }
 
+        const session = await getServerSession(authOptions);
+
         // Verify form exists
         const form = await prisma.form.findUnique({
             where: { id },
-            select: { id: true, published: true } // check published status in real app
+            select: { id: true, published: true, settings: true }
         });
 
         if (!form) {
             return NextResponse.json({ success: false, error: "Form not found" }, { status: 404 });
+        }
+
+        // Logic check: if requires login
+        const settings = form.settings as unknown as ThemeSettings;
+        if (settings?.requiresLogin && !session?.user) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+        }
+
+        const finalAnswers = { ...answers };
+        if (session?.user?.email) {
+            finalAnswers['__email_collected__'] = session.user.email;
         }
 
         // Create Response
@@ -29,8 +46,8 @@ export async function POST(
         const response = await prisma.response.create({
             data: {
                 formId: id,
-                answers: answers,
-                // userId: session?.user?.id, // Optional: Link to user if logged in (Anonymous for now)
+                answers: finalAnswers,
+                userId: session?.user?.id || null,
             }
         });
 
