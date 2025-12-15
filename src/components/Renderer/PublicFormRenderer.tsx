@@ -130,7 +130,7 @@ export const PublicFormRenderer: React.FC<PublicFormRendererProps> = ({ form }) 
                                 {q.type === 'SHORT_TEXT' && (
                                     <input
                                         type="text"
-                                        className="w-1/2 border-b border-gray-300 focus:border-purple-600 focus:outline-none py-1 transition-colors"
+                                        className="w-full md:w-1/2 border-b border-gray-300 focus:border-purple-600 focus:outline-none py-1 transition-colors"
                                         placeholder="Your answer"
                                         {...methods.register(q.id)}
                                     />

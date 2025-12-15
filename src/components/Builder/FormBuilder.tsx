@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/UI/Button";
 import { Input } from "@/components/UI/Input";
 import { Switch } from "@/components/UI/Switch";
-import { Save, Plus, Type, ArrowLeft, Palette, Eye } from "lucide-react";
+import { Save, Plus, Type, ArrowLeft, Palette, Eye, Layout } from "lucide-react";
 import { SortableQuestionCard } from "./SortableQuestionCard";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -225,11 +225,12 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                         <Eye className="h-5 w-5" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
-                        Share
+                        <span className="hidden md:inline">Share</span>
+                        <span className="md:hidden"><Layout className="h-4 w-4" /></span>
                     </Button>
                     <Button onClick={handleSave}>
                         <Save className="mr-2 h-4 w-4" />
-                        Save
+                        <span className="hidden md:inline">Save</span>
                     </Button>
                 </div>
             </div>
@@ -372,6 +373,16 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                     published={form.published}
                     onPublishChange={handlePublish}
                 />
+            </div>
+            {/* Mobile Bottom Bar */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex justify-around items-center z-50 pb-safe">
+                <Button variant="default" className="flex-1 mr-2 shadow-lg" onClick={handleAddQuestion}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Question
+                </Button>
+                <Button variant="outline" size="icon" disabled>
+                    <Type className="h-4 w-4" />
+                </Button>
             </div>
         </div>
     );
