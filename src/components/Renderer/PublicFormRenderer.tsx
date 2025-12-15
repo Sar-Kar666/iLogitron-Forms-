@@ -1,10 +1,17 @@
 "use client";
 
 import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/UI/Button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/UI/Select";
 import { EditorQuestion, EditorOption } from "@/types/editor";
 import { cn } from "@/lib/utils";
 
@@ -176,7 +183,26 @@ export const PublicFormRenderer: React.FC<PublicFormRendererProps> = ({ form }) 
                                     </div>
                                 )}
 
-                                {/* TODO: Dropdown, Linear Scale etc */}
+                                {q.type === 'DROPDOWN' && (
+                                    <Controller
+                                        control={methods.control}
+                                        name={q.id}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value as string}>
+                                                <SelectTrigger className="w-full md:w-1/2">
+                                                    <SelectValue placeholder="Select an option" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {(q.options as EditorOption[])?.map((opt, idx) => (
+                                                        <SelectItem key={opt.id || idx} value={opt.label}>
+                                                            {opt.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                )}
                             </div>
 
                             {methods.formState.errors[q.id] && (
