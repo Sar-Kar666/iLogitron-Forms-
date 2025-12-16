@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google"; // Fixed: Was imported but not used? No it is used.
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 
-const roboto = Roboto({
-  weight: ['400', '500', '700'],
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-roboto",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${roboto.variable} antialiased min-h-screen bg-background font-sans text-foreground`}
+        className={`${inter.variable} antialiased min-h-screen bg-background font-sans text-foreground`}
       >
         <Providers session={session}>
           <Navbar />

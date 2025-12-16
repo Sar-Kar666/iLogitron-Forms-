@@ -244,7 +244,7 @@ export function FormBuilder({ initialForm }: FormBuilderProps) {
                                     <Input
                                         value={form.title}
                                         onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                        className="text-3xl font-bold border-none px-0 focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent"
+                                        className="text-3xl font-bold border-none pl-2 focus-visible:ring-0 h-auto placeholder:text-muted-foreground/50 bg-transparent"
                                         placeholder="Form Title"
                                     />
                                     <Input
